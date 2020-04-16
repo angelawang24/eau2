@@ -123,48 +123,7 @@ to store the data the application will process, a `KDStore kd` to store `kv`, an
 are objects of this class.
 
 The KV store supports functions such as put(k,v), get(k), and getAndWait(k).
-## ##
-ayer 2: Abstractions Dataframe: The DataFrame class represents the dataframe
-and has fields: ObjectArray* columns_, which stores the columns of the
-dataframe, Schema* schema_, which represents the schema of the dataframe, size_t
-num_rows_, which represents the number of rows currently added to this
-dataframe, size_t num_cols_, which represents the number of rows currently added
-to this dataframe. DataFrame supports add_column, get_column, get_int, get_bool,
-get_float, get_string, set (int, bool, float, string), fill_row, add_row, map,
-pmap, filter, and print. The serialize function is overwritten in Dataframe to
-include the schema, the number of rows and the actual dataframe represented as
-an array of columns to make it easier to deserialize in the future.  Schema: The
-Schema class represents the schema of the dataframe; that is it tells how many
-rows and columns are in the dataframe, what the names are of these rows and
-columns, and what the types of each column are. The fields include: size_t
-numCol_, which stores the number of columns in the dataframe, size_t numRow_,
-which stores the number of rows in the data frame, StringArray* cTypes_, which
-is a list of the types of each column in the dataframe. Operations on the schema
-include: copying the schema, adding columns, adding rows, returning names,
-indices, and numbers of rows and columns, returning types of columns, and
-telling whether a schema and an object are equivalent.  Column: The Column class
-represents the columns in the dataframe. Similar to the Array class, the Column
-class is an Object that is never directly used; instead, there exist classes
-that extend the class called BoolColumn, FloatColumn, IntColumn, and
-StringColumn. Unlike the Array class, there is no ObjectColumn since these
-columns represent the actual columns in the dataframe, and the dataframe does
-not allow columns of any type other than Bool, Float, Int, and String, so there
-will never be any need for a column that holds Objects. The BoolColumn,
-FloatColumn, IntColumn, and StringColumn classes each contain a field arr_,
-which is an array that matches the type of element this column is meant to hold.
-For example, the BoolColumn contains an BoolArray** arr_. The Column field len_
-refers to the number of elements in this Array. The Column field num_elements
-refers to the number of elements in the Column. These numbers can be, but do not
-have to be, equal.  Instead of directly storing all of the elements in the
-Column, arr_ stores a list of pointers to other Arrays of fixed size. These
-fixed-size arrays store the Column's elements directly. In this way, when we
-increase the size of the Column, we don't have to copy over any payload, we only
-have to copy over the pointers to the fixed-size arrays. This is better, not
-only because we're copying over pointers instead of payload, but also because
-instead of having to do one copy for every element in the column, we do one copy
-for (number of elements in the column) divided by the size of the fixed-size
-ar 
-themselves support operations of push_back, remove, get, set, size, which
+
 ## Open Questions: ## 
 We assume that when the first node starts up, it holds all of
 the data from the KV Store, and then when more nodes are added to the system,
@@ -173,49 +132,7 @@ large overhead? When a second node is added, the data can be split in half. But
 when a third node is added, in order to split the data evenly in 3 parts, there
 will be a lot of overhead.
 
-## Status: ## 
-Currently, the prototype supports reading in data from a specific
-format, building a dataframe, and doing trivial operations on that dataframe. It
-also supports storing dataframes in nodes and returning them. It can also
-support multiple nodes running at once, though at the moment they need to be run
-in different threads so that they can all share memory rather than running on
-the network.  It supports multiple applications such as the wordcount
-application.
-
-
-## Remaining work: ## 
-Layer 1: Integrate NetworkingDevice classes and KVstores
-Integrate Network.h and the Serial class Build network so that nodes can send
-dataframe information over the network instead of all sharing the memory.
-class itself is never used; instead, we use classes that extend it: BoolArray,
-
-
-Arrays that only hold the specific type mentioned in their name. ObjectArrays
-are more broad, and can hold any type of object. Each of these classes have a
-field arr_, which represents the list of elements in the array. The Array
-classes support operations such as add, remove, index_of, get, and equals.
-
-  Key: The Key class represents the key to use in a KVStore. A key consists of a
-string and a home node, represented as a number. The string is the actual key
-used for searching, the home node tells which KV store owns the data.
-
-  KeyValueStore: The KeyValueStore class represents a store for a singular node.
-Each KVStore has a dictionary mapping Keys to serialized blobs, which are
-serialized DataFrames in our case. KeyValueStore supports put(k,v), get(k) and
-getAndWait(k). 
-
-  KDStore: the KDStore class is a layer of abstraction between a DataFrame and a
-KeyValueStore. It contains a KeyValueStore, and it supports the operation get on
-it. It deserializes the serialized blob that KeyValueStore's get method returns
-and it returns a DataFrame. 
-
-Layer 3: Application An Application class was created. It has a KeyValueStore kv
-to store the data the application will process, a KDStore kd to store kv, and a
-size_t index to represent the node it's on. Users can write applications that
-are objects of this class. 
-
-Use Cases: 
-	
+## Use Cases: ##
 class Demo : public Application { public: Key main("main",0); Key
 verify("verif",0); Key check("ck",0);
  
@@ -238,8 +155,8 @@ expected = kv.waitAndGet(check);
 pln(expected->get_double(0,0)==result->get_double(0,0) ? "SUCCESS":"FAILURE"); }
 };
 
-
-Status: Currently, the prototype supports reading in data from a specific
+## Status: ##
+Currently, the prototype supports reading in data from a specific
 format, building a dataframe, and doing trivial operations on that dataframe. It
 also supports storing dataframes in nodes and returning them. It can also
 support multiple nodes running at once, though at the moment they need to be run
@@ -247,10 +164,8 @@ in different threads so that they can all share memory rather than running on
 the network.  It supports multiple applications such as the wordcount
 application. There are no memory leaks in the code!
 
-
-Remaining work: Layer 1: Integrate NetworkingDevice classes and KVstores
+## Remaining work: ## 
+Layer 1: Integrate NetworkingDevice classes and KVstores
 Integrate Network.h and the Serial class Build network so that nodes can send
 dataframe information over the network instead of all sharing the memory. Complete 
 linus application.
-
-
